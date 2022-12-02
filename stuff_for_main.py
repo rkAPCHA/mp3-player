@@ -57,7 +57,7 @@ class Interface:
         self.thread = threading.Thread(target=self.loop_music)
         self.thread.daemon = True
         self.thread_stop_now = False
-
+        self.time_music = 0
 
     def button_hover_enter(self, event):
         for i in self.gragient:
@@ -119,7 +119,7 @@ class Interface:
             self.can.bind('<B1-Motion>', self.volume)
             self.choose_button.configure(command=self.choose_music)
             self.matrix_labels = [[Label(self.root, background='whitesmoke', width=1, pady=0.2) for x in range(10)] for y in
-                             range(8)]
+                             range(7)]
             self.can.create_rectangle(30, 90, 240, 280, fill='whitesmoke')
             y = 250
             for i in self.matrix_labels:
@@ -136,11 +136,12 @@ class Interface:
 
 
     def loop_music(self):
-        for x in self.beat_times:
+        for x in range(self.time_music, len(self.beat_times)+1):
             while 1:
                 if self.thread_stop_now:
+                    self.time_music = list(self.beat_times).index(self.beat_times[x])
                     return None
-                if (x -0.1) <= mixer.music.get_pos()/1000 <= (x+0.1):
+                if (self.beat_times[x] -0.05) <= mixer.music.get_pos()/1000 <= (self.beat_times[x]+0.05):
                     if self.one_frame_of_bit():
                         break
 
@@ -178,7 +179,8 @@ class Interface:
         if not self.music_now_playing:
             mixer.music.unpause()
             self.music_now_playing = True
-            self.thread.start()
+            self.thread.run()
+            self.thread_stop_now = False
         else:
             mixer.music.pause()
             self.music_now_playing = False
@@ -210,7 +212,7 @@ class Interface:
     def one_frame_of_bit(self):
         random_choose = random.choice(self.matrix_labels[0][2:8])
         random_choose_index = self.matrix_labels[0].index(random_choose)
-        random_choose_height = random.choice([3, 4,5,6, 7, 8])
+        random_choose_height = random.choice([3, 4,5,6, 7, ])
         buffer = []
         side_right = random_choose_height - random.choice([2,1])
         side_left = random_choose_height - random.choice([2,1])
